@@ -22,6 +22,12 @@
             android:layout_height="wrap_content"
             android:onClick="choosePhoto"
             android:text="Choose Photo" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="savePhoto"
+            android:text="Save Photo" />
         <!-- Sepia -->
         <Button
             android:layout_width="match_parent"

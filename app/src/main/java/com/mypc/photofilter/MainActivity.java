@@ -1,15 +1,22 @@
 package com.mypc.photofilter;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -28,7 +35,9 @@ import jp.wasabeef.glide.transformations.gpu.SepiaFilterTransformation;
 import jp.wasabeef.glide.transformations.gpu.SketchFilterTransformation;
 import jp.wasabeef.glide.transformations.gpu.ToonFilterTransformation;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
+
+    private int WRITE_PERMISSION_CODE = 1;
 
     private ImageView imageView;
     private Bitmap image;
@@ -39,13 +48,32 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         imageView = findViewById(R.id.image_view);
-
     }
 
     public void choosePhoto(View v) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("image/*");
         startActivityForResult(intent, 1);
+    }
+
+    public void savePhoto(View v) {
+        requestStoragePermissions();
+
+        BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+        if (drawable != null) {
+            Bitmap filteredImage = drawable.getBitmap();
+
+            MediaStore.Images.Media.insertImage(getContentResolver(), filteredImage, "Filtered", "Wow");    
+        } else {
+            Toast.makeText(this, "Load image first.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void requestStoragePermissions() {
+        // If permission hasn't been granted then request it
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_PERMISSION_CODE);
+        }
     }
 
     public void applyFilter(Transformation<Bitmap> filter) {
@@ -97,4 +125,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+//    if(requestCode == WRITE_PERMISSION_CODE) {
+//        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//
+//        }
+//    }
 }
